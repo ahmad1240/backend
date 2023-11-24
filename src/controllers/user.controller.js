@@ -8,7 +8,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // 1 - Get user Details from Front-End (user Model se lai lainge)
 
   const { fullName, email, username, password } = req.body;
-  console.log("email:", email, "fullName:", fullName);
+  // console.log("email:", email, "fullName:", fullName);
 
   // 2 - validation on Every Point - Not Empty check kre
 
@@ -24,17 +24,25 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // 3 - Check if User alredy have Account/Register kisi bhi field se chek kre yaha (Username,Email)
 
-  const existedUsr = User.findOne({
+  const existedUsr = await User.findOne({
     $or: [{ username }, { email }],
   });
 
   if (existedUsr) throw new ApiError(409, "User existed");
-
+  // console.log(req.files);
   // 4 - Chek kre files hai ki nhi jaise Avatar
 
   const avatarLoacalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
   if (!avatarLoacalPath) throw new ApiError(400, "Avatar is required");
 
   // 5 - Upload them on Cloudinary wha response se URL nikalo
